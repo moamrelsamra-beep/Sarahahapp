@@ -1,31 +1,88 @@
-import userModel from "../DB/models/user.model.js";
-import * as dbService from "../DB/db.service.js";
-import jwt from "jsonwebtoken";
-import { hashSync, compareSync } from "bcrypt";
-import { OAuth2Client } from "google-auth-library";
-const client = new OAuth2Client();
+import userModel from "../../DB/models/user.model.js";
+import * as dbService from "../../DB/db.service.js";
+import { Hash } from "../../common/security/hash.js"; 
+import { Encrypt } from "../../common/security/encrypt.js"; 
+
+// export const signUp = async (req, res, next) => {
+//   try {
+//     const { fName, lName, email, password, age, gender, phone } = req.body;
+    
+//     if (await userModel.findOne({ email: email.toLowerCase() })) {
+//       return res.status(400).json({ message: "User already exist" });
+//     }
+    
+//     const user = await dbService.create({
+//       model: userModel,
+//       data: {
+//         fName,
+//         lName,
+//         email: email.toLowerCase(),
+//         password: await Hash(password),
+//         age,
+//         gender,
+//         phone: Encrypt(phone),
+//       }
+//     });
+    
+//     return res.status(201).json({ message: "User created successfully", user });
+//   } catch (error) {
+//     return res.status(500).json({ message: "Error in signup", error: error.message });
+//   }
+// };
 
 
-export const signUp = async (req, res) => {
-  try {
-    const { fName, lName, email, password, age, gender } = req.body;
-    const existEmail = await dbService.findOne({
-      model: userModel,
-      data: { email },
-    });
-    if (existEmail) {
-      // return res.status(400).json({msg: "Email already exists"})
-      throw new Error("Email already exists");
-    }
-    const user = await dbService.create({
-      model: userModel,
-      data: { fName, lName, email, password, age, gender },
-    });
-    res.status(201).json({ msg: "User created successfully", user });
-  } catch (error) {
-    res.status(500).json({ msg: "Failed to signup", error });
-  }
-};
+
+//  const {fName, lName, email, password, age, gender, phone} = req.body;
+// if(await userModel.findOne({email: email.toLowerCase()})){
+//   throw new Error("User already exist", {cause: 400}) }
+//   const user = await dbService.create({
+//     model: userModel,
+//     data: {
+//       fName,
+//       lName,
+//       email: email.toLowerCase(),
+//       password: await Hash(password),
+//       age,
+//       gender,
+//       phone,
+//       profileImage: req.file 
+//     }
+//   });
+  
+//};
+
+export const signUp = async (req, res, next) => {
+  
+   const {fName, lName, email, password, age, gender, phone} = req.body;
+        console.log(req.file)
+      const paths = []
+        for(const file of req.files.attachments){
+          paths.push(file.path)
+        }
+
+if(await userModel.findOne({email: email.toLowerCase()})){
+  throw new Error("User already exist", {cause: 400}) }
+
+
+
+  const user = await dbService.create({
+    model: userModel,
+    data: {
+      fName,
+      lName,
+      email: email.toLowerCase(),
+      password: await Hash(password),
+      age,
+      gender,
+      phone: Encrypt(phone),
+      profileImage:req.files.attachment[0].path,
+      coverImages:paths
+}
+})
+  return res.status(201).json({ message: "User created successfully", user });
+}
+
+
 
 export const signUpWithGmail = async (req,res,next) => {
   try {

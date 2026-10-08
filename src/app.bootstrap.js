@@ -1,8 +1,8 @@
 import express from "express";
 import connectDB from "./DB/connectionDB.js";
 import userModel from "./DB/models/user.model.js";
-import router from "./modules/user.controller.js";
-import cors from "cors"
+import router from "./modules/users/user.controller.js";
+import cors from "cors";
 const app = express();
 const port = 3000;
 

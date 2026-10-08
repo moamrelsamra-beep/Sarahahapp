@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema(
+export const userSchema = new mongoose.Schema(
   {
     fName: {
       type: String,
@@ -26,14 +26,14 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: function () {
-        return this.provider == "system"? true : false
+        return this.provider == "system" ? true : false;
       },
       trim: true,
     },
     age: {
       type: Number,
       required: function () {
-        return this.provider == "system"? true : false
+        return this.provider == "system" ? true : false;
       },
       min: 18,
       max: 100,
@@ -45,10 +45,12 @@ const userSchema = new mongoose.Schema(
       default: "male",
     },
     profileImage: String,
-    phone: {
+    coverImages: [String],
+    phone: String,
+    role: {
       type: String,
-      required: true,
-      unique: true,
+      enum: ["user", "admin"],
+      default: "user",
     },
     provider: {
       type: String,
@@ -73,5 +75,5 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-const userModel = mongoose.model("user", userSchema);
+ const userModel = mongoose.model("user", userSchema);
 export default userModel;

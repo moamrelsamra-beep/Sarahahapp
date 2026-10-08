@@ -1,7 +1,7 @@
 {
   "name": "sarahah-app",
   "version": "1.0.0",
-  "description": "",
+  "description": "��#\u0000 \u0000S\u0000a\u0000r\u0000a\u0000h\u0000a\u0000h\u0000a\u0000p\u0000p\u0000\r\u0000 \u0000",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -16,7 +16,17 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "google-auth-library": "^11.1.0",
+    "joi": "^18.2.9",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.10.1"
-  }
+    "mongoose": "^9.10.1",
+    "multer": "^2.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moamrelsamra-beep/Sarahahapp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/moamrelsamra-beep/Sarahahapp/issues"
+  },
+  "homepage": "https://github.com/moamrelsamra-beep/Sarahahapp#readme"
 }

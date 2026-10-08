@@ -1,24 +1,28 @@
+import jwt from "jsonwebtoken";
+import { findOne } from "../../DB/db.service.js"; 
+import  userModel from "../../DB/models/user.model.js";
 
+export const authentication = async (req, res, next) => {
+  const { authorization } = req.headers;
 
-export const authentication = (req, res, next) => {
-    const {authorization} = req.headers;
-        if(!authorization){
-      return res.status(400).json({message: "Token not exist"})
-     }
-       
-    const decoded = jwt.verify(authorization, "mohamed123")
- 
+  if (!authorization) {
+    throw new Error("Token not exist", { cause: 404 });
+  }
 
-    // const user = await dbService.findOne({
-    //   model: userModel,
-    //   filter: {
-    //     email: decoded.email.toLowerCase(),
-    //     //isConfirmed:true,
-    //     provider: "system",
-    //   },
-    // });
+  const decoded = jwt.verify(authorization, "mohamed123");
+  if (!decoded?.id) {
+    throw new Error("Token not valid", { cause: 400 });
+  }
+  const user = await findOne({
+    model: userModel,
+    filter: {
+      _id: decoded.id,
+    },
+  });
+  if (!user) {
+    throw new Error("User not Exixt", { cause: 400 });
+  }
+  req.user = user;
 
-
-}
-
-
+  next();
+};
