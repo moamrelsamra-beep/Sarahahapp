@@ -1,9 +1,9 @@
 import multer from "multer";
 import {randomUUID} from "crypto";
-import fs from "fs";
+import fs from "node:fs";
 
 
-export const multerLocal = (customPath= "General", customTypes= []) => {
+export const multerLocal = ({customPath= "General", customTypes= []} = {}) => {
   
     const path= `uploads/${customPath}`;
 
@@ -20,9 +20,10 @@ export const multerLocal = (customPath= "General", customTypes= []) => {
 }
   });
 
-   function fileFilter(req, file, cb) {
+   const fileFilter = (req, file, cb) => {
+    console.log({file})
     if (!customTypes.includes(file.mimetype)) {
-      cb(new Error("Invalid file type", {cause: 400}), false);
+      return cb(new Error("Invalid file type"));
     } else {
       cb(null, true);
     }

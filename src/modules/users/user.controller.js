@@ -5,7 +5,15 @@ import { authorization } from "../../common/middleware/authorization.js"
 import { Validation } from "../../common/middleware/validation.js"
 import {RoleEnum} from "../../common/enum/user.enum.js"
 import {signUpSchema} from "./user.validation.js"
+import {loginSchema} from "./user.validation.js"
+import {refreshTokenSchema} from "./user.validation.js"
+import {shareProfileSchema} from "./user.validation.js"
+import {shareProfile} from "./user.service.js"
+import {updateProfileSchema} from "./user.validation.js"
 import {multerLocal} from "../../common/middleware/multer.js"
+import { updatePassword } from "./user.service.js"
+import { updatePasswordSchema } from "./user.validation.js";
+import jwt from "jsonwebtoken";
 
 const router = Router()
 
@@ -15,18 +23,23 @@ const router = Router()
 //              { name: "attachment", maxCount: 2 }
 //     ]),Validation(signUpSchema),US.signUp)
 
-router.post(
-  '/signup',
-  multerLocal({customPath: "users", customTypes: ["image/png", "image/jpeg", "image/jpg"]}).fields([
-    { name: "attachments", maxCount: 4 },
-    { name: "attachment", maxCount: 2 }
+router.post('/signup',multerLocal({customPath: "users", customTypes: ["image/png", "image/jpeg", "image/jpg"]}).fields([
+    { name: "attachments" },
+    { name: "attachment" }
   ]),
   Validation(signUpSchema),
   US.signUp
 );
-router.post('/login',US.login)
+
+router.post('/login',Validation(loginSchema), US.login)
 router.post('/profile',authentication,authorization( [RoleEnum.user] ),US.getProfile)
 router.post('/signUp/gmail',US.signUpWithGmail)
+
+router.post('/refresh-token',Validation(refreshTokenSchema),US.refreshToken)
+router.get('/share-profile/:id',Validation( shareProfileSchema ),US.shareProfile)
+router.patch('/update-profile',Validation( updateProfileSchema ),authentication,US.updateProfile)
+router.patch('/update-password',Validation( updatePasswordSchema ),authentication,US.updatePassword)
+router.patch('/logout',authentication,US.logout)
 
 
 export default router

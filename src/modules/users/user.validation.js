@@ -1,4 +1,6 @@
 import joi from "joi";
+import { generalRules } from "../../common/utils/generalRules.js";
+
 
 export const signUpSchema = {
   body: joi
@@ -33,20 +35,58 @@ export const signUpSchema = {
       gender: joi.string().valid("male", "female").required().messages({
         "any.required": "Gender is required",
         "string.valid": "Gender must be either 'male' or 'female'"})
-    //flag: joi.boolean().default(false),
-    //   users: joi
-    //     .array()
-    //     .items(
-    //       joi
-    //         .object({
-    //           x: joi.string(),
-    //         })
-    //         .required(),
-    //     )
-    //     .required(),
-    // })
-     //.required(),
-}).required()
-.with("password", "confirmPassword"),
+}).required(),
 
+ //file: generalRules.file.required(),
+
+files: joi.object({
+  attachment:joi.array().items(generalRules.file).required(),
+   
+  attachments:joi.array().items(generalRules.file.required()).required()
+}).required()
 }
+
+
+export const loginSchema = {
+  body: joi.object({
+    email:  generalRules.email.required(),
+    password: generalRules.password.required()
+  }).required()
+}
+
+
+export const refreshTokenSchema = {
+  headers: generalRules.token.required()
+}
+
+
+export const shareProfileSchema = {
+  params: joi.object({
+    id:generalRules.id.required()
+  }).required()
+}
+
+
+export const updateProfileSchema = {
+  body: joi
+    .object({
+      fName: joi.string().alphanum().min(2).max(10)
+      ,
+      lName: joi.string()
+      ,
+      phone: joi.string()
+      ,
+      age: joi.number()
+      ,
+      gender: joi.string().valid("male", "female")
+}).required(),
+}
+
+export const updatePasswordSchema = {
+  body: joi.object({
+    oldPassword: generalRules.password.required(),
+    newPassword: generalRules.password.required(),
+    confirmPassword:joi.string().valid(joi.ref("newPassword")).required()
+  }).required()
+
+  }

@@ -3,6 +3,7 @@ import connectDB from "./DB/connectionDB.js";
 import userModel from "./DB/models/user.model.js";
 import router from "./modules/users/user.controller.js";
 import cors from "cors";
+import connectionRedis from "./DB/connection.redis.js";
 const app = express();
 const port = 3000;
 
@@ -16,6 +17,7 @@ const bootstrap = async () => {
   );
 
   await connectDB();
+  await connectionRedis();
 
   app.use("/users", router);
 

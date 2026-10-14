@@ -59,8 +59,9 @@ export const userSchema = new mongoose.Schema(
     },
     isConfirmed: {
       type: Boolean,
-      default: false,
+      default: true,
     },
+    changeCredentialAt: Date,
   },
   {
     timestamps: true,
@@ -75,5 +76,5 @@ export const userSchema = new mongoose.Schema(
   },
 );
 
- const userModel = mongoose.model("user", userSchema);
+const userModel = mongoose.model("user", userSchema);
 export default userModel;
