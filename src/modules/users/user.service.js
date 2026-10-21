@@ -5,7 +5,11 @@ import { Encrypt } from "../../common/security/encrypt.js";
 import { Decrypt } from "../../common/security/encrypt.js";
 import { randomUUID } from "node:crypto";
 import jwt from "jsonwebtoken";
-import {keys, setValue, deleteKey } from "../../DB/service/redis.service.js";
+import {keys, setValue, deleteKey, getValue } from "../../DB/service/redis.service.js";
+import sendEmail, { generate_otp } from "../../common/service/sendEmail.js";
+import { compareSync, hashSync } from "bcryptjs";
+import { eventEmitter } from "../../common/utils/event.js";
+import { sendEmailOtp } from "./user.helper.js";
 
 
 // export const signUp = async (req, res, next) => {
@@ -66,7 +70,30 @@ export const signUp = async (req, res, next) => {
   if (await userModel.findOne({ email: email.toLowerCase() })) {
     throw new Error("User already exist", { cause: 400 });
   }
+        
+     const otp = await generate_otp()
+     const otpHash= hashSync(otp, 12)
 
+     await setValue({
+      key:`otp::${email}`,
+      value:otpHash,
+      ttl: 60*2
+     })
+
+    await setValue({
+      key:`otp::max::${email}`,
+      value:"1",
+      ttl: 5 * 60
+     })
+
+          eventEmitter.emit("confirm_email", async () => {
+             await sendEmail({
+          to: email,
+          subject:"Confirm Email",
+          html:`<h1>otp:${otp} </h1>`
+         })
+          })
+        
   const user = await dbService.create({
     model: userModel,
     data: {
@@ -81,6 +108,15 @@ export const signUp = async (req, res, next) => {
       coverImages: paths,
     },
   });
+  
+  return res.status(201).json({ message: "User created successfully", user });
+};
+
+export const reSendOtp = async (req, res, next) => {
+  const { email } = req.body;
+  
+ await sendEmailOtp({email})
+
   return res.status(201).json({ message: "User created successfully", user });
 };
 
@@ -190,6 +226,36 @@ export const getProfile = async (req, res, next) => {
 //     return res.status(500).json({ message: error.message, stack: error.stack });
 //   }
 // };
+
+export const confirmEmail = async (req, res, next) => {
+  const { email, otp } = req.body;
+     
+  const otpValue = await getValue(`otp::${email}`)
+
+  if(!otpValue){
+    throw new Error ("otp expire", {cause:400})
+  }
+
+  if(!compareSync(otp, otpValue)){
+     throw new Error ("otp Invalid", { cause:400 })
+  }
+
+  const user = await dbService.findOneAndUpdate({
+    model: userModel,
+    filter:{
+      email,
+      isConfirmed: {$exists: false}
+    },
+    update:{
+      isConfirmed: true
+    }
+  })
+      if(!user){
+  throw new Error ("User Not Exist", {cause:400})
+  }
+  await deleteKey()
+  return res.status(200).json({message: "Done", user})
+}
 
 export const shareProfile = async (req, res, next) => {
   const { id } = req.params;
@@ -330,3 +396,35 @@ export const logout = async (req, res, next) => {
 
   return res.status(200).json({ message: "Done" });
 };
+
+export const forgetPassword = async (req, res, next) => {
+  const {email} = req.body
+  
+await sendEmailOtp({email, isConfirmed: true})
+
+return res.status(200).json({message: "Done"})
+
+}
+
+export const resetPassword = async (req, res, next) => {
+  const {email, code, password} = req.body
+  const otpValue = await getValue(`otp::${email}`)
+  if(!otpValue) throw new Error ("otp expire")
+    
+    if(!await Compare(code, otpValue)) throw new Error("otp in invalid")
+    
+      await dbService.findOneAndUpdate({
+        model:userModel,
+        filter: {
+          email,
+          isConfirmed: true
+        },
+        update: {
+          password: await Hash(password)
+        }
+      })
+     await deleteKey(`otp::${email}`)
+
+     return res.status(200).json({message: "Done"})
+
+}

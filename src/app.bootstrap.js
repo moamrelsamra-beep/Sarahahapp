@@ -4,6 +4,7 @@ import userModel from "./DB/models/user.model.js";
 import router from "./modules/users/user.controller.js";
 import cors from "cors";
 import connectionRedis from "./DB/connection.redis.js";
+import messageRouter from "./modules/messages/message.controller.js";
 const app = express();
 const port = 3000;
 
@@ -20,6 +21,7 @@ const bootstrap = async () => {
   await connectionRedis();
 
   app.use("/users", router);
+  app.use("/messages", messageRouter);
 
   app.use("{/*demo}", (req, res) => {
     res.status(404).json({

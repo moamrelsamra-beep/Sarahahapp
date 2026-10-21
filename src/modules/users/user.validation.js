@@ -1,5 +1,6 @@
 import joi from "joi";
 import { generalRules } from "../../common/utils/generalRules.js";
+import nodemailer from "nodemailer";
 
 
 export const signUpSchema = {
@@ -54,6 +55,12 @@ export const loginSchema = {
   }).required()
 }
 
+export const confirmEmailSchema = {
+  body: joi.object({
+    email:  joi.string().required(),
+    otp: joi.string().pattern(/^[0-9]{6}$/).required()
+  }).required()
+}
 
 export const refreshTokenSchema = {
   headers: generalRules.token.required()

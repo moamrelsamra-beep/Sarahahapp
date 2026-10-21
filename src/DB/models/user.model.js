@@ -59,7 +59,6 @@ export const userSchema = new mongoose.Schema(
     },
     isConfirmed: {
       type: Boolean,
-      default: true,
     },
     changeCredentialAt: Date,
   },

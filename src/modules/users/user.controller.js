@@ -13,6 +13,7 @@ import {updateProfileSchema} from "./user.validation.js"
 import {multerLocal} from "../../common/middleware/multer.js"
 import { updatePassword } from "./user.service.js"
 import { updatePasswordSchema } from "./user.validation.js";
+import { confirmEmailSchema } from "./user.validation.js";
 import jwt from "jsonwebtoken";
 
 const router = Router()
@@ -40,6 +41,10 @@ router.get('/share-profile/:id',Validation( shareProfileSchema ),US.shareProfile
 router.patch('/update-profile',Validation( updateProfileSchema ),authentication,US.updateProfile)
 router.patch('/update-password',Validation( updatePasswordSchema ),authentication,US.updatePassword)
 router.patch('/logout',authentication,US.logout)
+router.patch('/confirmEmail',Validation( confirmEmailSchema ),US.confirmEmail)
+router.patch('/forget-password',US.forgetPassword)
+router.patch('/reset-password',US.resetPassword)
+router.patch('/resend-otp',US.reSendOtp)
 
 
 export default router
