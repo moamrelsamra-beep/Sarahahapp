@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import  userModel from "../../DB/models/user.model.js";
 import * as dbService from "../../DB/service/db.service.js"
+import { ACCESS_TOKEN_SIGNATURE } from "../../../config/config.service.js";
+
 export const authentication = async (req, res, next) => {
   // const { authorization } = req.headers;
 
@@ -8,7 +10,7 @@ export const authentication = async (req, res, next) => {
     throw new Error("Token not exist", { cause: 404 });
   }
 
-  const decoded = jwt.verify(authorization, "mohamed@123");
+  const decoded = jwt.verify(authorization, ACCESS_TOKEN_SIGNATURE);
 
   if (!decoded?.id) {
     return res.status(400).json({message: "Invalid Token"})

@@ -10,6 +10,8 @@ import sendEmail, { generate_otp } from "../../common/service/sendEmail.js";
 import { compareSync, hashSync } from "bcryptjs";
 import { eventEmitter } from "../../common/utils/event.js";
 import { sendEmailOtp } from "./user.helper.js";
+import { success_response } from "../../common/utils/success.response.js";
+import { ACCESS_TOKEN_SIGNATURE,REFRESH_TOKEN_SIGNATURE,AUDIENCE_GMAIL, SALT_ROUNDS } from "../../../config/config.service.js";
 
 
 // export const signUp = async (req, res, next) => {
@@ -72,7 +74,7 @@ export const signUp = async (req, res, next) => {
   }
         
      const otp = await generate_otp()
-     const otpHash= hashSync(otp, 12)
+     const otpHash= hashSync(otp,Number(SALT_ROUNDS))
 
      await setValue({
       key:`otp::${email}`,
@@ -109,7 +111,7 @@ export const signUp = async (req, res, next) => {
     },
   });
   
-  return res.status(201).json({ message: "User created successfully", user });
+      success_response({res, statusCode:201, data: user})
 };
 
 export const reSendOtp = async (req, res, next) => {
@@ -117,45 +119,43 @@ export const reSendOtp = async (req, res, next) => {
   
  await sendEmailOtp({email})
 
-  return res.status(201).json({ message: "User created successfully", user });
+       success_response({res})
+
 };
 
 export const signUpWithGmail = async (req, res, next) => {
-  //   try {
-  //     const {idToken} = req.body;
-  //   const decoded = await client.verifyIdToken({
-  //       idToken,
-  //       audience: "193419008535-e98ihqlvgbqp019pa9iju54ric6b4fjm.apps.googleusercontent.com",  // Specify the WEB_CLIENT_ID of the app that accesses the backend
-  //       // Or, if multiple clients access the backend:
-  //       //[WEB_CLIENT_ID_1, WEB_CLIENT_ID_2, WEB_CLIENT_ID_3]
-  //   });
-  //   const {family_name, given_name, picture, email_verified, email}= decoded.getPayload()
-  //    let user = await userModel.findOne({email: email.toLowerCase()})
-  //        if(!user){
-  //         user= await userModel.create({
-  //           fName:given_name,
-  //           lName:family_name,
-  //           email,
-  //           profileImage:picture,
-  //           isConfirmed:email_verified,
-  //           provider: "google"
-  //         })
-  //        }
-  //          if(user.provider == "system"){
-  //                es.status(400).json({ msg: "login with system only" });
-  //          }
-  //             const access_token = jwt.sign(
-  //        { id: user._id, email: user.email },
-  //        "mohamed123")
-  //              const refresh_token = jwt.sign(
-  //        { id: user._id, email: user.email },
-  //        "ali123",
-  //    );
-  // const payload = decoded.getPayload();
-  // console.log({payload});
-  //  } catch (error) {
-  //         res.status(500).json({ msg: "Failed to signup", error });
-  //   }
+    
+      const {idToken} = req.body;
+    const decoded = await client.verifyIdToken({
+        idToken,
+        audience: AUDIENCE_GMAIL,  // Specify the WEB_CLIENT_ID of the app that accesses the backend
+       
+    });
+    const {family_name, given_name, picture, email_verified, email}= decoded.getPayload()
+     let user = await userModel.findOne({email: email.toLowerCase()})
+         if(!user){
+          user= await userModel.create({
+            fName:given_name,
+            lName:family_name,
+            email,
+            profileImage:picture,
+            isConfirmed:email_verified,
+            provider: "google"
+          })
+         }
+           if(user.provider == "system"){
+                 es.status(400).json({ msg: "login with system only" });
+           }
+              const access_token = jwt.sign(
+         { id: user._id, email: user.email },
+         ACCESS_TOKEN_SIGNATURE)
+               const refresh_token = jwt.sign(
+         { id: user._id, email: user.email },
+        REFRESH_TOKEN_SIGNATURE,
+     );
+   
+    success_response({res, statusCode:201, data:access_token,refresh_token  })
+  
 };
 
 export const getProfile = async (req, res, next) => {
@@ -254,7 +254,8 @@ export const confirmEmail = async (req, res, next) => {
   throw new Error ("User Not Exist", {cause:400})
   }
   await deleteKey()
-  return res.status(200).json({message: "Done", user})
+
+        success_response({res, statusCode:201, data: user})
 }
 
 export const shareProfile = async (req, res, next) => {
@@ -308,14 +309,8 @@ export const login = async (req, res, next) => {
     jwtid: tokenid,
   });
 
-  res
-    .status(200)
-    .json({
-      message: "Login successful",
-      access_token,
-      refresh_token,
-      user: { ...user._doc, phone: Decrypt(user.phone) },
-    });
+success_response({res, statusCode:201, data: {access_token, refresh_token}})
+  
 };
 
 export const refreshToken = async (req, res, next) => {

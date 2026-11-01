@@ -1,15 +1,15 @@
+import { DB_URI } from "../../config/config.service.js";
 import mongoose from "mongoose";
 
-const connectDB = async () => {
-  await mongoose
-    .connect("mongodb://127.0.0.1:27017/sarahahapp", {
-      serverSelectionTimeoutMS: 5000,
-    })
-    .then(() => {
+
+export default async function connectDB() {
+try{ 
+  await mongoose.connect(DB_URI, {serverSelectionTimeoutMS: 5000})
+    
       console.log("DB connected successfully......!!!!");
-    })
-    .catch((error) => {
+    
+}catch(error) {
       console.log(error, "DB connection failed");
-    });
+    }
 };
-export default connectDB;
+

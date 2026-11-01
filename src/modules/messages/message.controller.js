@@ -6,7 +6,7 @@ import {multerLocal} from "../../common/middleware/multer.js"
 import * as MV from "./message.validation.js"
 import { Multer_Enum } from "../../common/enum/multer.enum.js"
 
-const messageRouter = Router()
+const messageRouter = Router({strict: true, caseSensitive: true, mergeParams: true})
 
 
 
@@ -15,6 +15,9 @@ messageRouter.post("/",multerLocal({customPath: "users", customTypes:Multer_Enum
   ,Validation(MV.createMessageSchema),
   US.createMessage
 );
+messageRouter.get("/",authentication,US.getMessages)
+messageRouter.get("/:id",authentication,US.getMessagesById)
+messageRouter.delete("/:id",authentication,US.deleteMessage)
 
 
 export default messageRouter

@@ -15,14 +15,10 @@ import { updatePassword } from "./user.service.js"
 import { updatePasswordSchema } from "./user.validation.js";
 import { confirmEmailSchema } from "./user.validation.js";
 import jwt from "jsonwebtoken";
+import messageRouter from "../messages/message.controller.js"
 
 const router = Router()
-
-//  router.post('/signup',
-//     multerLocal({customTypes: ["image/png", "image/jpeg"]})
-//     .fields([{ name: "attachments", maxCount: 4 },
-//              { name: "attachment", maxCount: 2 }
-//     ]),Validation(signUpSchema),US.signUp)
+router.use("/:id/messages", messageRouter)
 
 router.post('/signup',multerLocal({customPath: "users", customTypes: ["image/png", "image/jpeg", "image/jpg"]}).fields([
     { name: "attachments" },

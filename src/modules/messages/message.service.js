@@ -1,3 +1,4 @@
+import { model } from "mongoose";
 import messageModel from "../../DB/models/message.model.js";
 import userModel from "../../DB/models/user.model.js";
 import * as dbService from "../../DB/service/db.service.js";
@@ -36,3 +37,45 @@ export const createMessage = async (req, res, next) => {
     return res.status(201).json({ message: "Done", message });
 
 };
+
+
+export const getMessages = async (req,res,next) => {
+    
+    const message = await dbService.find({
+        model:messageModel,
+        filter: {
+            userId: req.params.userId
+        }
+    })
+    return res.status(200).json({message: "Done",
+        data: message
+    })
+}
+
+export const getMessagesById = async (req,res,next) => {
+    
+    const message = await dbService.findOne({
+        model:messageModel,
+        filter: {
+            _id:req.params.id,
+            userId: req.user._id
+        }
+    })
+    return res.status(200).json({message: "Done",
+        data: message
+    })
+}
+
+export const deleteMessage = async (req,res,next) => {
+    
+    const message = await dbService.deleteOne({
+        model:messageModel,
+        filter: {
+            _id:req.params.id,
+            userId: req.user._id
+        }
+    })
+    return res.status(200).json({message: "Done",
+        data: message
+    })
+}
